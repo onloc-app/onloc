@@ -27,6 +27,9 @@ services:
     container_name: onloc-ui
     environment:
       - PORT=3000
+    volumes:
+      - /dev/stdout:/var/log/nginx/access.log
+      - /dev/stderr:/var/log/nginx/error.log
     healthcheck:
       test:
         - CMD-SHELL
@@ -67,6 +70,17 @@ services:
     configs:
       - source: caddyfile
         target: /etc/caddy/Caddyfile
+    command: >
+      sh -c 'echo ":80 {
+        # Proxy API, docs and WebSocket to the backend
+        reverse_proxy /api* api:4000
+        reverse_proxy /ws* api:4000
+        reverse_proxy /docs* api:4000
+        reverse_proxy /uploads* api:4000
+
+        # Everything else goes to the frontend
+        reverse_proxy ui:3000
+      }" > /etc/caddy/Caddyfile && caddy run --config /etc/caddy/Caddyfile'
     healthcheck:
       test:
         - CMD-SHELL
@@ -80,20 +94,6 @@ services:
         condition: service_healthy
       ui:
         condition: service_healthy
-
-configs:
-  caddyfile:
-    content: |
-      :80 {
-        # Proxy API, docs and WebSocket to backend
-        reverse_proxy /api* api:4000
-        reverse_proxy /ws* api:4000
-        reverse_proxy /docs* api:4000
-        reverse_proxy /uploads* api:4000
-
-        # Everything else goes to the frontend
-        reverse_proxy ui:3000
-      }
 
 networks:
   default:
