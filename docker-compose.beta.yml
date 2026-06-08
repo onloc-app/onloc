@@ -67,9 +67,6 @@ services:
     restart: unless-stopped
     ports:
       - "6144:80"
-    configs:
-      - source: caddyfile
-        target: /etc/caddy/Caddyfile
     command: >
       sh -c 'echo ":80 {
         # Proxy API, docs and WebSocket to the backend
