@@ -27,9 +27,6 @@ services:
     container_name: onloc-ui
     environment:
       - PORT=3000
-    volumes:
-      - /dev/stdout:/var/log/nginx/access.log
-      - /dev/stderr:/var/log/nginx/error.log
     healthcheck:
       test:
         - CMD-SHELL
